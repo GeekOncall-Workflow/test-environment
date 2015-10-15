@@ -63,7 +63,7 @@ set +e
 grep -q ^10\.1\.1\.4 /etc/hosts
 if [ $? -eq 1 ]
 then
-  echo -n "10.1.1.4\tpuppet" >> /etc/hosts
+  echo -e "10.1.1.4\tpuppet" >> /etc/hosts
 fi
 set -e
 

@@ -8,7 +8,7 @@ Vagrant.configure(2) do |config|
     box.vm.provision "shell" do |s|
       s.path = "box-scripts/base"
       s.args = "puppet-master"
-    end 
+    end
     box.vm.box = "puppetlabs/centos-6.6-64-nocm"
   end
   config.vm.define "jenkins-master" do |box|
@@ -18,7 +18,11 @@ Vagrant.configure(2) do |config|
     box.vm.provision "shell" do |s|
       s.path = "box-scripts/base"
       s.args = "jenkins-master"
-    end 
+    end
+    config.vm.provider :virtualbox do |vb|
+        vb.customize ["modifyvm", :id, "--memory", "1048"]
+        vb.customize ["modifyvm", :id, "--cpus", "1"]
+    end
     box.vm.box = "puppetlabs/centos-6.6-64-nocm"
   end
 
