@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Pull/run r10k
+if [ -d "${gitDir}/puppet-r10k" ]
+then
+  PullProjectRepo "puppet-r10k"
+else
+  PullProjectRepo "puppet-r10k"
+  ${gitDir}/puppet-r10k/install.sh
+fi
+
+# Install the Passenger repo
+case $osfamily in
+  RedHat)
+    if [ ! -f '/etc/yum.repos.d/passenger.repo' ]
+    then
+      for i in epel-release pygpgme curl
+      do
+        YumInstall "$i"
+      done
+      curl --fail -sSLo /etc/yum.repos.d/passenger.repo https://oss-binaries.phusionpassenger.com/yum/definitions/el-passenger.repo
+    fi
+  ;;
+  *)
+    Fail "Unsupported OS."
+  ;;
+esac
+
+puppet apply /vagrant/site.pp "--modulepath=/etc/puppet/environments/${puppetEnvironment}/modules"
