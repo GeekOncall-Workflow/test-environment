@@ -17,7 +17,6 @@ Vagrant.configure(2) do |config|
     box.vm.network "forwarded_port", guest: 8080, host: 8080
     box.vm.provision "shell" do |s|
       s.path = "box-scripts/base"
-      s.args = "jenkins-master"
     end
     config.vm.provider :virtualbox do |vb|
         vb.customize ["modifyvm", :id, "--memory", "1048"]

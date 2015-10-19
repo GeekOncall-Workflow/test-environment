@@ -12,16 +12,19 @@ puppetEnvironment='production'
 roles=$@
 currentDir=$(pwd)
 
+# Define some functions, which will be inherited by any subsequent scripts
 Fail() {
   echo "$@"
   exit 1
 }
 
+# No, seriously.  Install this package
 YumInstall() {
   package="$1"
   yum --nogpgcheck -y install "$package"
 }
 
+# Creates the $gitDir if it doesn't exist, or it bombs if $gitDir is a non-directory file
 if [ ! -d "$gitDir" ]
 then
   if [ -e "$gitDir" ]
@@ -31,6 +34,8 @@ then
     mkdir -p "$gitDir"
   fi
 fi
+
+# Get the latest from $gitProject/$1
 PullProjectRepo() {
   repo="$1"
   gitPath="${gitProject}/${repo}.git"
@@ -45,28 +50,40 @@ PullProjectRepo() {
 }
 
 RedHat() {
+# Add the Puppet repositories
   echo -e "[puppet-products]\nname=puppet-products\nbaseurl=http://yum.puppetlabs.com/el/\$releasever/products/\$basearch\ngpgcheck=0\nenabled=1" > /etc/yum.repos.d/puppet.repo
   echo -e "[puppet-dependencies]\nname=puppet-dependencies\nbaseurl=http://yum.puppetlabs.com/el/\$releasever/dependencies/\$basearch\ngpgcheck=0\nenabled=1" >> /etc/yum.repos.d/puppet.repo
-  YumInstall git
-  YumInstall puppet-3.8.1
+# Install some things
+  for i in 'git' 'puppet-3.8.1'
+  do
+    YumInstall "$i"
+  done
+# Disabling iptables, for now
+set +e
+  service iptables status
+  if [ $? -eq 0 ]
+  then
+    service iptables stop
+    chkconfig iptables off
+  fi
+set -e
+   
 }
 
+# End of function definitions
+
+# Try to determine which OS is running
 if [ -f '/etc/debian_version' ]
 then
   osfamily='Debian'
 elif [ -f '/etc/redhat-release' ]
 then
   osfamily='RedHat'
+else
+  osfamily='unsupported'
 fi
 
-set +e
-grep -q ^10\.1\.1\.4 /etc/hosts
-if [ $? -eq 1 ]
-then
-  echo -e "10.1.1.4\tpuppet" >> /etc/hosts
-fi
-set -e
-
+# Run the function that corresponds to the detected OS
 case $osfamily in
   RedHat)
     RedHat
@@ -79,8 +96,29 @@ case $osfamily in
   ;;
 esac
 
+# Puppet should be installed now, so facter can be used
+fqdn=$(facter fqdn)
+set +e
+# Verify that the "puppet" entry is in /etc/hosts, until DNS is used
+grep -q ^10\.1\.1\.4 /etc/hosts
+if [ $? -eq 1 ]
+then
+  echo -e "10.1.1.4\tpuppet" >> /etc/hosts
+fi
+# Verify that $fqdn is in /etc/hosts.  This may happen if DHCP appends a domain to the Vagrant hostname, or if DNS is using funky wildcards
+  grep -q -w "$fqdn" /etc/hosts
+  if [ $? -ne 0 ]
+  then
+    sed -i "s/^\(127.0.0.1.*\)/\1\ $fqdn/" /etc/hosts
+  fi   
+set -e
+
+# Include any subsequent scripts that may have been passed
 for role in ${roles[@]}
 do
   echo "Inclding $role role"
   . /vagrant/box-scripts/${role}
 done
+
+# Finally, run Puppet
+puppet agent -t
