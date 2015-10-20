@@ -9,7 +9,7 @@ Vagrant.configure(2) do |config|
       s.path = "box-scripts/base"
       s.args = "puppet-master"
     end
-    box.vm.box = "puppetlabs/centos-6.6-64-nocm"
+    box.vm.box = "puppetlabs/centos-7.0-64-nocm"
   end
   config.vm.define "jenkins-master" do |box|
     box.vm.hostname = "jenkins-master"

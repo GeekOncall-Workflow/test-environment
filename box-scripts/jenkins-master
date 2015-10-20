@@ -1,5 +1,0 @@
-#!/bin/bash
-
-chkconfig puppet off
-service puppet stop
-puppet agent -t
