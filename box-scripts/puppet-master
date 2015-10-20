@@ -26,4 +26,4 @@ case $osfamily in
   ;;
 esac
 
-puppet apply /etc/puppet/environments/${puppetEnvironment}/modules/site.pp "--modulepath=/etc/puppet/environments/${puppetEnvironment}/modules"
+puppet apply /etc/puppet/environments/${puppetEnvironment}/manifests/site.pp "--modulepath=/etc/puppet/environments/${puppetEnvironment}/modules"
