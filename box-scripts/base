@@ -21,7 +21,13 @@ Fail() {
 # No, seriously.  Install this package
 YumInstall() {
   package="$1"
-  yum --nogpgcheck -y install "$package"
+set +e
+  rpm -q "$package"
+  if [ $? -ne 0 ]
+  then
+    yum --nogpgcheck -y install "$package"
+  fi
+set -e
 }
 
 # Creates the $gitDir if it doesn't exist, or it bombs if $gitDir is a non-directory file
@@ -59,12 +65,19 @@ RedHat() {
     YumInstall "$i"
   done
 # Disabling iptables, for now
+osr=$(facter operatingsystemmajrelease)
+if [ $osr -ge 7 ]
+then
+  firewallServiceName="firewalld"
+else
+  firewallServiceName="iptables"
+fi
 set +e
-  service iptables status
+  service "$firewallServiceName" status
   if [ $? -eq 0 ]
   then
-    service iptables stop
-    chkconfig iptables off
+    service "$firewallServiceName" stop
+    chkconfig "$firewallServiceName" off
   fi
 set -e
    
@@ -109,7 +122,7 @@ fi
   grep -q -w "$fqdn" /etc/hosts
   if [ $? -ne 0 ]
   then
-    sed -i "s/^\(127.0.0.1.*\)/\1\ $fqdn/" /etc/hosts
+    sed -i "s/^\(127.0.0.1\s*\)\(.*\)/\1$fqdn\ \2/" /etc/hosts
   fi   
 set -e
 
@@ -121,4 +134,7 @@ do
 done
 
 # Finally, run Puppet
+# It may be running already, or it may return 0.  Vagrant shouldn't care, so error checking's removed
+set +e
 puppet agent -t
+set -e
