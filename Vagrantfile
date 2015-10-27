@@ -29,7 +29,8 @@ Vagrant.configure(2) do |config|
   config.vm.define "foreman" do |box|
     box.vm.hostname = "foreman"
     box.vm.network "private_network", ip: "10.1.1.6"
-    box.vm.network "forwarded_port", guest: 8443, host: 8443
+    box.vm.network "forwarded_port", guest: 443, host: 8843
+    box.vm.network "forwarded_port", guest: 80, host: 8800
     box.vm.provision "shell" do |s|
       s.path = "box-scripts/base"
     end
