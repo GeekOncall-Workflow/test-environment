@@ -56,6 +56,22 @@ PullProjectRepo() {
   fi
 }
 
+Debian() {
+  code_name=$(lsb_release -c | awk '{ print $NF}')
+  if [ ! -f '/root/puppetlabs.gpg' ]
+  then
+    wget http://apt.puppetlabs.com/pubkey.gpg -O /root/puppetlabs.gpg
+    apt-key add /root/puppetlabs.gpg
+  fi
+  if [ ! -f '/etc/apt/sources.list.d/puppetlabs.list' ]
+  then
+    echo "deb http://apt.puppetlabs.com ${code_name} dependencies main" > /etc/apt/sources.list.d/puppetlabs.list
+  fi
+  apt-get update
+  apt-get install -y puppet-common
+  puppet agent --enable
+}
+
 RedHat() {
 # Add the Puppet repositories
   echo -e "[puppet-products]\nname=puppet-products\nbaseurl=http://yum.puppetlabs.com/el/\$releasever/products/\$basearch\ngpgcheck=0\nenabled=1" > /etc/yum.repos.d/puppet.repo
@@ -125,7 +141,7 @@ fi
 grep -q -w "$fqdn" /etc/hosts
 if [ $? -ne 0 ]
 then
-  sed -i "s/^\(127.0.0.1\s*\)\(.*\)/\1$fqdn\ \2/" /etc/hosts
+  sed -i "s/^\(127.0.0.1\)\s*\(.*\)/\1\t$fqdn\ \2/" /etc/hosts
 fi
 set -e
 

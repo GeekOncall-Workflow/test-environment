@@ -62,4 +62,13 @@ Vagrant.configure(2) do |config|
     end
     box.vm.box = "puppetlabs/centos-7.0-64-nocm"
   end
+
+  config.vm.define "cobbler-ubuntu" do |box|
+    box.vm.hostname = "cobbler-ubuntu"
+    box.vm.network "private_network", ip: "10.1.1.9"
+    box.vm.provision "shell" do |s|
+      s.path = "box-scripts/base"
+    end
+    box.vm.box = "ubuntu/trusty64"
+  end
 end
