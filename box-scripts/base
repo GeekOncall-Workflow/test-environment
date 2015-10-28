@@ -30,7 +30,8 @@ set +e
 set -e
 }
 
-# Creates the $gitDir if it doesn't exist, or it bombs if $gitDir is a non-directory file
+# Creates the $gitDir if it doesn't exist, or it bombs if $gitDir is a
+# non-directory file
 if [ ! -d "$gitDir" ]
 then
   if [ -e "$gitDir" ]
@@ -80,7 +81,6 @@ set +e
     chkconfig "$firewallServiceName" off
   fi
 set -e
-   
 }
 
 # End of function definitions
@@ -112,18 +112,21 @@ esac
 # Puppet should be installed now, so facter can be used
 fqdn=$(facter fqdn)
 set +e
+
 # Verify that the "puppet" entry is in /etc/hosts, until DNS is used
 grep -q ^10\.1\.1\.4 /etc/hosts
 if [ $? -eq 1 ]
 then
   echo -e "10.1.1.4\tpuppet" >> /etc/hosts
 fi
-# Verify that $fqdn is in /etc/hosts.  This may happen if DHCP appends a domain to the Vagrant hostname, or if DNS is using funky wildcards
-  grep -q -w "$fqdn" /etc/hosts
-  if [ $? -ne 0 ]
-  then
-    sed -i "s/^\(127.0.0.1\s*\)\(.*\)/\1$fqdn\ \2/" /etc/hosts
-  fi   
+
+# Verify that $fqdn is in /etc/hosts.  This may happen if DHCP appends a
+# domain to the Vagrant hostname, or if DNS is using funky wildcards
+grep -q -w "$fqdn" /etc/hosts
+if [ $? -ne 0 ]
+then
+  sed -i "s/^\(127.0.0.1\s*\)\(.*\)/\1$fqdn\ \2/" /etc/hosts
+fi
 set -e
 
 # Include any subsequent scripts that may have been passed
@@ -134,7 +137,8 @@ do
 done
 
 # Finally, run Puppet
-# It may be running already, or it may return 0.  Vagrant shouldn't care, so error checking's removed
+# It may be running already, or it may return 0.  Vagrant shouldn't care,
+# so error checking's removed
 set +e
 puppet agent -t
 set -e
