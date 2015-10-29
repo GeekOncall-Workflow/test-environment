@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# This is to sync the numerous Git repos from the master to this directory,
+# that they may then be put into the appropriate repos and committed.
+# It helps us develop and test things on the master without losing track of our
+# (hopefully working) changes.
+
+# Will hopefully be changed to "development" or something at some point
+puppet_environment='production'
+
+rsync="rsync -avz --exclude=".git*" --exclude="modules" "$1" --delete"
+
+$rsync "/etc/puppet/environments/${puppet_environment}/" "/vagrant/puppet-r10k"
+$rsync "/etc/puppet/environments/${puppet_environment}/modules/profiles" "/vagrant/puppet_module_profiles"
+$rsync "/etc/puppet/environments/${puppet_environment}/modules/pxe" "/vagrant/puppet_module_pxe"
