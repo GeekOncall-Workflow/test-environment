@@ -1,7 +1,6 @@
 #!/bin/bash
 #set -e
 set -u
-set -x
 
 users=('devops-workflow')
 
@@ -43,4 +42,5 @@ for user in ${users[@]}
 do
   echo "Synching $user"
   SyncUser "$user"
+  echo "All done"
 done

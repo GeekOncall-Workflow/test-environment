@@ -1,6 +1,5 @@
 .git
 .vagrant
-README
 jenkins-display-icons
 jenkins-dsls
 jenkins-job-builder-config
@@ -14,6 +13,6 @@ puppet_module_profiles
 puppet_module_pxe
 puppet_module_site_workflow
 puppet_module_zookeeper
+README
 scripts
 testing-repo
-

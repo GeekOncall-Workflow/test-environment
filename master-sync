@@ -10,6 +10,6 @@ puppet_environment='production'
 
 rsync="rsync -avz --exclude=".git*" --exclude="modules" "$1" --delete"
 
-$rsync "/etc/puppet/environments/${puppet_environment}/" "/vagrant/puppet-r10k"
-$rsync "/etc/puppet/environments/${puppet_environment}/modules/profiles" "/vagrant/puppet_module_profiles"
-$rsync "/etc/puppet/environments/${puppet_environment}/modules/pxe" "/vagrant/puppet_module_pxe"
+$rsync "/etc/puppet/environments/${puppet_environment}/" "/vagrant/puppet-r10k/"
+$rsync "/etc/puppet/environments/${puppet_environment}/modules/profiles/" "/vagrant/puppet_module_profiles/"
+$rsync "/etc/puppet/environments/${puppet_environment}/modules/pxe/" "/vagrant/puppet_module_pxe/"
