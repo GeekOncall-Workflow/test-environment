@@ -23,11 +23,24 @@ YumInstall() {
   package="$1"
 set +e
   rpm -q "$package"
-  if [ $? -ne 0 ]
+  result=$?
+set -e
+  if [ $result -ne 0 ]
   then
     yum --nogpgcheck -y install "$package"
   fi
+}
+
+AptInstall() {
+  package="$1"
+set +e
+  dpkg -l "$package"
+  result=$?
 set -e
+  if [ $result -ne 0 ]
+  then
+    apt-get -y install "$package"
+  fi
 }
 
 # Creates the $gitDir if it doesn't exist, or it bombs if $gitDir is a
@@ -60,43 +73,30 @@ Debian() {
   code_name=$(lsb_release -c | awk '{ print $NF}')
   if [ ! -f '/root/puppetlabs.gpg' ]
   then
-    wget http://apt.puppetlabs.com/pubkey.gpg -O /root/puppetlabs.gpg
+    wget -q http://apt.puppetlabs.com/pubkey.gpg -O /root/puppetlabs.gpg
     apt-key add /root/puppetlabs.gpg
   fi
   if [ ! -f '/etc/apt/sources.list.d/puppetlabs.list' ]
   then
     echo "deb http://apt.puppetlabs.com ${code_name} dependencies main" > /etc/apt/sources.list.d/puppetlabs.list
+    apt-get update
+    AptInstall puppet-common
   fi
-  apt-get update
-  apt-get install -y puppet-common
   puppet agent --enable
 }
 
 RedHat() {
 # Add the Puppet repositories
-  echo -e "[puppet-products]\nname=puppet-products\nbaseurl=http://yum.puppetlabs.com/el/\$releasever/products/\$basearch\ngpgcheck=0\nenabled=1" > /etc/yum.repos.d/puppet.repo
-  echo -e "[puppet-dependencies]\nname=puppet-dependencies\nbaseurl=http://yum.puppetlabs.com/el/\$releasever/dependencies/\$basearch\ngpgcheck=0\nenabled=1" >> /etc/yum.repos.d/puppet.repo
+  if [ ! -f '/etc/yum.repos.d/puppet.repo' ]
+  then
+    echo -e "[puppet-products]\nname=puppet-products\nbaseurl=http://yum.puppetlabs.com/el/\$releasever/products/\$basearch\ngpgcheck=0\nenabled=1" > /etc/yum.repos.d/puppet.repo
+    echo -e "[puppet-dependencies]\nname=puppet-dependencies\nbaseurl=http://yum.puppetlabs.com/el/\$releasever/dependencies/\$basearch\ngpgcheck=0\nenabled=1" >> /etc/yum.repos.d/puppet.repo
+  fi
 # Install some things
   for i in 'git' 'puppet-3.8.1'
   do
     YumInstall "$i"
   done
-# Disabling iptables, for now
-osr=$(facter operatingsystemmajrelease)
-if [ $osr -ge 7 ]
-then
-  firewallServiceName="firewalld"
-else
-  firewallServiceName="iptables"
-fi
-set +e
-  service "$firewallServiceName" status
-  if [ $? -eq 0 ]
-  then
-    service "$firewallServiceName" stop
-    chkconfig "$firewallServiceName" off
-  fi
-set -e
 }
 
 # End of function definitions
@@ -127,19 +127,24 @@ esac
 
 # Puppet should be installed now, so facter can be used
 fqdn=$(facter fqdn)
-set +e
 
 # Verify that the "puppet" entry is in /etc/hosts, until DNS is used
+set +e
 grep -q ^10\.1\.1\.4 /etc/hosts
-if [ $? -eq 1 ]
+result=$?
+set -e
+if [ $result -ne 0 ]
 then
   echo -e "10.1.1.4\tpuppet" >> /etc/hosts
 fi
 
 # Verify that $fqdn is in /etc/hosts.  This may happen if DHCP appends a
 # domain to the Vagrant hostname, or if DNS is using funky wildcards
+set +e
 grep -q -w "$fqdn" /etc/hosts
-if [ $? -ne 0 ]
+result=$?
+set -e
+if [ $result -ne 0 ]
 then
   sed -i "s/^\(127.0.0.1\)\s*\(.*\)/\1\t$fqdn\ \2/" /etc/hosts
 fi
@@ -153,7 +158,7 @@ do
 done
 
 # Finally, run Puppet
-# It may be running already, or it may return 0.  Vagrant shouldn't care,
+# It may be running already, or it may return non-zero.  Vagrant shouldn't care,
 # so error checking's removed
 set +e
 puppet agent -t
