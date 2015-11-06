@@ -15,6 +15,7 @@ Vagrant.configure(2) do |config|
   config.vm.define "jenkins-master" do |box|
     box.vm.hostname = "jenkins-master"
     box.vm.network "private_network", ip: "10.1.1.5"
+    box.vm.network "forwarded_port", guest: 8080, host: 8080, auto_correct: true
     box.vm.provision "shell" do |s|
       s.path = "box-scripts/base"
     end
