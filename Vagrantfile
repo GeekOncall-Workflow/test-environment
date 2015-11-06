@@ -51,8 +51,8 @@ Vagrant.configure(2) do |config|
     box.vm.box = "puppetlabs/centos-7.0-64-nocm"
   end
 
-  config.vm.define "cobbler" do |box|
-    box.vm.hostname = "cobbler"
+  config.vm.define "cent7" do |box|
+    box.vm.hostname = "cent7"
     box.vm.network "private_network", ip: "10.1.1.8"
     box.vm.provision "shell" do |s|
       s.path = "box-scripts/base"
@@ -60,12 +60,22 @@ Vagrant.configure(2) do |config|
     box.vm.box = "puppetlabs/centos-7.0-64-nocm"
   end
 
-  config.vm.define "cobbler-ubuntu" do |box|
-    box.vm.hostname = "cobbler-ubuntu"
+  config.vm.define "trusty" do |box|
+    box.vm.hostname = "trusty"
     box.vm.network "private_network", ip: "10.1.1.9"
     box.vm.provision "shell" do |s|
       s.path = "box-scripts/base"
     end
     box.vm.box = "ubuntu/trusty64"
   end
+
+  config.vm.define "jessie" do |box|
+    box.vm.hostname = "jessie"
+    box.vm.network "private_network", ip: "10.1.1.10"
+    box.vm.provision "shell" do |s|
+      s.path = "box-scripts/base"
+    end
+    box.vm.box = "debian/jessie64"
+  end
+
 end

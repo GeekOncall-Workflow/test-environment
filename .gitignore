@@ -1,5 +1,6 @@
 .git
 .vagrant
+jenkins-build-per-branch
 jenkins-display-icons
 jenkins-dsls
 jenkins-job-builder-config
