@@ -80,8 +80,9 @@ Debian() {
   then
     echo "deb http://apt.puppetlabs.com ${code_name} dependencies main" > /etc/apt/sources.list.d/puppetlabs.list
     apt-get update
-    AptInstall puppet-common
   fi
+  AptInstall puppet-common
+  AptInstall git
   puppet agent --enable
 }
 
