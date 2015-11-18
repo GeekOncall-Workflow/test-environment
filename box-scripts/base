@@ -154,7 +154,7 @@ set -e
 # Include any subsequent scripts that may have been passed
 for role in ${roles[@]}
 do
-  echo "Inclding $role role"
+  echo "Including $role role"
   . /vagrant/box-scripts/${role}
 done
 
