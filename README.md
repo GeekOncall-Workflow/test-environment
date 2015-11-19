@@ -18,7 +18,10 @@ Here's a complete example, using puppet-r10k.
 1. Add your SSH key to GitHub
 1. Clone this repo and change to the cloned directory
 1. Run `./git-sync` to pull all of the other repos into this directory
-1. `vagrant up puppet-master && vagrant ssh puppet-master`
+1. Deploy puppet-master VM: `vagrant up puppet-master`
+1. Reload puppet-master to set selinux to enforcing: `vagrant reload puppet-master`
+1. Reconfigure puppet-master to finish selinux configuration: `vagrant provision puppet-master`
+1. Login to puppet-master: `vagrant ssh puppet-master`
 1. Modify some files, such as those in hieradata.
 1. In another terminal, `vagrant up` any relevant clients, then test the changes
 1. Back on the master, run `/vagrant/master-sync` to synchronize the changes to this directory
@@ -31,10 +34,11 @@ Here's a complete example, using puppet-r10k.
 
 ##### box-scripts
 
-These scripts should only contain the step necessary to get from the base Vagrant box to a successful Puppet run.  The Vagrantfile should only call the base script, which accepts arguments.  Any arguments passed should be the names scripts that might need to be called for certain machines.  This should probably only happen for the Puppet master, since all other configuration should be done by Puppet.  No cheating!  
-  
-Example:  This block of code calls the base script, which will then call the puppet-master script.  The script pathnames are relative.  
-`box.vm.provision "shell" do |s|`  
-`  s.path = "box-scripts/base"`  
-`  s.args = "puppet-master"`  
-`end`
+These scripts should only contain the step necessary to get from the base Vagrant box to a successful Puppet run.  The Vagrantfile should only call the base script, which accepts arguments.  Any arguments passed should be the names scripts that might need to be called for certain machines.  This should probably only happen for the Puppet master, since all other configuration should be done by Puppet.  No cheating!
+
+Example:  This block of code calls the base script, which will then call the puppet-master script.  The script pathnames are relative.
+
+    box.vm.provision "shell" do |s|
+      s.path = "box-scripts/base"
+      s.args = "puppet-master"
+    end
