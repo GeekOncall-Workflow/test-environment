@@ -32,6 +32,12 @@ Here's a complete example, using puppet-r10k.
 1. `git commit -m "Some commit message"`
 1. `git push`
 
+##### Some Notes about SELinux
+
+Since most Vagrant boxes come with SELinux disabled, any Puppet configuration that modifies SELinux will fail.  This won't cause the run to fail, but it will show red messages during the Puppet run, e.g. during a `vagrant up` or `vagrant provision`.
+
+When an existing vagrant box is rebooted, it may come back up with SELinux enabled.  This is of particular note on the Puppet master, since SELinux will prevent agents from connecting, including the master itself.  To correct this, SSH to the master and re-run Puppet manually from the appropriate environment.  For example: `cd /etc/puppet/environments/production; puppet apply manifests/site.pp --modulepath=modules`.
+
 ##### box-scripts
 
 These scripts should only contain the step necessary to get from the base Vagrant box to a successful Puppet run.  The Vagrantfile should only call the base script, which accepts arguments.  Any arguments passed should be the names scripts that might need to be called for certain machines.  This should probably only happen for the Puppet master, since all other configuration should be done by Puppet.  No cheating!
