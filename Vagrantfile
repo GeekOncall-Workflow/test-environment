@@ -83,8 +83,8 @@ Vagrant.configure(2) do |config|
     box.vm.box = "debian/jessie64"
   end
 
-  config.vm.define "ganglia" do |box|
-    box.vm.hostname = "ganglia"
+  config.vm.define "ganglia-master" do |box|
+    box.vm.hostname = "ganglia-master"
     box.vm.network "private_network", ip: "10.1.1.11"
     box.vm.provision "shell" do |s|
       s.path = "box-scripts/base"
