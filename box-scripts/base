@@ -8,8 +8,9 @@ gitProject='https://github.com/devops-workflow'
 # Clones from $gitProject are stored under this directory
 gitDir='/root'
 puppetEnvironment='production'
+domainName='example.com'
 
-roles=$@
+roles=($@)
 currentDir=$(pwd)
 
 # Define some functions, which will be inherited by any subsequent scripts
@@ -98,6 +99,9 @@ RedHat() {
   do
     YumInstall "$i"
   done
+# Kill firewalld
+  systemctl stop firewalld
+  systemctl disable firewalld
 }
 
 # End of function definitions
@@ -127,7 +131,7 @@ case $osfamily in
 esac
 
 # Puppet should be installed now, so facter can be used
-fqdn=$(facter fqdn)
+fqdn="${roles[0]}.${domainName}"
 
 # Verify that the "puppet" entry is in /etc/hosts, until DNS is used
 set +e
@@ -150,6 +154,8 @@ then
   sed -i "s/^\(127.0.0.1\)\s*\(.*\)/\1\t$fqdn\ \2/" /etc/hosts
 fi
 set -e
+
+echo "$fqdn" > /etc/hostname
 
 # Include any subsequent scripts that may have been passed
 for role in ${roles[@]}

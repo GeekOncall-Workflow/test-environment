@@ -3,7 +3,7 @@
 Vagrant.configure(2) do |config|
 
   config.vm.define "puppet-master" do |box|
-    box.vm.hostname = "puppet-master.example.com"
+    box.vm.hostname = "puppet-master"
     box.vm.network "private_network", ip: "10.1.1.4"
     box.vm.network "forwarded_port", guest: 80, host: 80, auto_correct: true
     box.vm.provider "virtualbox" do |v|
